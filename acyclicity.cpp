@@ -4,7 +4,7 @@ using namespace std;
 /*
 * Author: mahmoud youssef
 * Respect Coursera Honor Code
-* Copyright © 2019. All rights reserved
+* Copyright Â© 2019. All rights reserved
 *
 */
 vector<bool> _vist;
@@ -52,3 +52,4 @@ void main() {
   has_cycle = false;
   std::cout << acyclic(adj);
 }
+
