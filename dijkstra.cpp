@@ -1,104 +1,76 @@
 #include <iostream>
-#include <limits>
-#include <queue>
-#include <set>
 #include <vector>
+#include <queue>
+using namespace std;
 
 /*
-* Author: Ayran Olckers
-* Website https://ayran.dev
+* Author: mahmoud youssef
 * Respect Coursera Honor Code
 * Copyright © 2019. All rights reserved
 *
 */
 
+typedef pair<int, int> iPair;
+vector<int>dist,parnt;
+void dijkstra(vector<vector<int> >& adj, vector<vector<int> >& cost, int s)
+{
+    ///////////////////init//////////////////
+    int n = adj.size();
+    //heap
+    priority_queue< iPair, vector <iPair>, greater<iPair> > pq;
 
-const bool DEBUG = false;
+    dist.resize(n);
+    parnt.resize(n);
 
-// Node structure to use in the priority_queue supporting Dijkstra's algorithm
-struct Node {
-    int idx;
-    int dist;
-
-    Node(int idx, int dist) : idx(idx), dist(dist) {}
-
-    bool operator>(const Node &rhs) const { return this->dist > rhs.dist; }
-};
-
-// Weighted directed graph class
-class WeightedDiGraph {
-    std::vector<std::vector<int>> adj;
-    std::vector<std::vector<int>> weights;
-
-  public:
-    WeightedDiGraph(int n) : adj(n, std::vector<int>()), weights(n, std::vector<int>()) {}
-
-    void add_edges(const int m) {
-        for (int j = 0; j < m; ++j) {
-            int s, t, w;
-            std::cin >> s >> t >> w;
-            // we use 0 index instead of 1 index
-            this->adj[s - 1].push_back(t - 1);
-            this->weights[s - 1].push_back(w);
-        }
+    for (int i = 0; i < n; i++) {
+        dist[i] = INT32_MAX;
+        parnt[i] = -1;
     }
 
-    // Dijkstra's algorithm to compute weighted distance fron node s
-    std::vector<int> dijkstra(const int s) {
-        // initialize distances to "infinity"
-        std::vector<int> dist(adj.size(), std::numeric_limits<int>::max());
-        dist[s] = 0;
+    dist[s] = 0;
+    pq.push(make_pair(dist[s], s));
+    /////////////////////////////////////////
+    while (!pq.empty())
+    {
+        //Extract minimum//
+        int u = pq.top().second;
+        pq.pop();
 
-        // keep nodes to be processed in a priority queue, heart of Dijkstra's algorithm
-        std::priority_queue<Node, std::vector<Node>, std::greater<Node>> pq;
-        pq.push(Node(s, 0));
+        for (int i=0;i<adj[u].size();i++)
+        {
+            int v = adj[u][i];
 
-        // priority_queue doesn't support changes of priority so we need to keep track
-        // of updated distances some other way
-        std::set<int> processed;
-
-        while (not pq.empty()) {
-            auto curr = pq.top();
-            pq.pop();
-            int curr_idx = curr.idx;
-
-            if (DEBUG) {
-                std::cout << "Processing: " << curr.idx << ", dist=" << curr.dist << std::endl;
+            if (dist[v] > dist[u] + cost[u][i]) {
+                dist[v] = dist[u] + cost[u][i];
+                parnt[v] = u;
+                //change praiorty
+                pq.push(make_pair(dist[v], v));
             }
-            // check whether we have seen the node before (i.e. distance was updated)
-            if (processed.find(curr_idx) != processed.end()) {
-                if (DEBUG) {
-                    std::cout << "Node " << curr.idx << " was already processed." << std::endl;
-                }
-                continue;
-            }
-            // process outgoing edges to improve distance estimates
-            for (int i = 0; i < adj[curr_idx].size(); ++i) {
-                int n = adj[curr_idx][i];
-                if (dist[n] > dist[curr_idx] + weights[curr_idx][i]) {
-                    dist[n] = dist[curr_idx] + weights[curr_idx][i];
-                    // append node with improved distance estimate
-                    pq.push(Node(n, dist[n]));
-                }
-            }
-            processed.insert(curr_idx);
         }
-
-        return dist;
     }
-};
+}
+long long distance(vector<vector<int> > &adj, vector<vector<int> > &cost, int s, int t) {
+  //write your code her
+    dijkstra(adj,cost,s);
+
+    if (dist[t] != INT32_MAX)
+        return dist[t];
+  return -1;
+}
 
 int main() {
-    int n, m;
-    std::cin >> n >> m;
-    // initialize graph
-    WeightedDiGraph graph(n);
-    // read edges
-    graph.add_edges(m);
-
-    int s, t;
-    std::cin >> s >> t;
-    s--, t--;
-    auto s_dist = graph.dijkstra(s);
-    std::cout << (s_dist[t] == std::numeric_limits<int>::max() ? -1 : s_dist[t]) << std::endl;
+  int n, m;
+  std::cin >> n >> m;
+  vector<vector<int> > adj(n, vector<int>());
+  vector<vector<int> > cost(n, vector<int>());
+  for (int i = 0; i < m; i++) {
+    int x, y, w;
+    std::cin >> x >> y >> w;
+    adj[x - 1].push_back(y - 1);
+    cost[x - 1].push_back(w);
+  }
+  int s, t;
+  std::cin >> s >> t;
+  s--, t--;
+  std::cout << distance(adj, cost, s, t);
 }
